@@ -98,10 +98,75 @@
                     </button>
                     <p id="login-message" class="mt-4 text-sm font-semibold text-center"></p>
                 </form>
+                <p class="mt-2 text-center text-sm text-gray-600">
+                    <a href="#" onclick="showForgotPassword()" class="font-medium text-red-600 hover:text-red-500 transition duration-150">Forgot password?</a>
+                </p>
                 <p class="mt-6 text-center text-sm text-gray-600">
                     Don't have an account? 
                     <a href="#" onclick="toggleAuthView('register')" class="font-medium text-blue-600 hover:text-blue-500 transition duration-150">Sign Up Here</a>
                 </p>
+            </div>
+
+            <!-- Password Reset Container (Hidden initially) -->
+            <div id="reset-container" class="bg-white/80 p-8 rounded-xl shadow-lg border border-yellow-100 w-full max-w-lg mx-auto hidden">
+                <h2 class="text-2xl font-semibold mb-4 text-blue-600 text-center">Reset Your Password</h2>
+
+                <!-- Step 1: Enter email to receive OTP -->
+                <div id="reset-step-email" class="space-y-3">
+                    <p class="text-sm text-gray-700">Enter your registered email and we'll send a one-time code (OTP).</p>
+                    <div>
+                        <label for="reset-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="reset-email" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="sendPasswordReset()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg">Send OTP</button>
+                        <button onclick="cancelReset()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg">Cancel</button>
+                    </div>
+                    <p id="reset-email-message" class="text-sm mt-2"></p>
+                </div>
+
+                <!-- Step 2: Verify OTP -->
+                <div id="reset-step-otp" class="space-y-3 hidden">
+                    <p class="text-sm text-gray-700">Enter the code we sent to your email.</p>
+                    <div>
+                        <label for="reset-otp" class="block text-sm font-medium text-gray-700 mb-1">OTP</label>
+                        <input type="text" id="reset-otp" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none" maxlength="6">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="verifyResetOtp()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg">Verify OTP</button>
+                        <button onclick="resendOtp()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg">Resend</button>
+                    </div>
+                    <p id="reset-otp-message" class="text-sm mt-2"></p>
+                    <p id="reset-otp-dev" class="text-sm text-gray-500 mt-2 hidden">Dev OTP: <span id="reset-otp-display"></span></p>
+                </div>
+
+                <!-- Step 3: Set new password -->
+                <div id="reset-step-newpass" class="space-y-3 hidden">
+                    <p class="text-sm text-gray-700">Create a new password for your account.</p>
+                    <div>
+                        <label for="reset-new-password" class="block text-sm font-medium text-gray-700 mb-1">New password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="reset-new-password" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none">
+                            <button type="button" class="password-toggle" aria-label="Show password" data-target="reset-new-password">
+                                <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="reset-confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="reset-confirm-password" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none">
+                            <button type="button" class="password-toggle" aria-label="Show password" data-target="reset-confirm-password">
+                                <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="submitNewPassword()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg">Save New Password</button>
+                        <button onclick="cancelReset()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg">Cancel</button>
+                    </div>
+                    <p id="reset-newpass-message" class="text-sm mt-2"></p>
+                </div>
             </div>
 
             <!-- Registration Form Container (Hidden initially) --><div id="register-container" class="bg-white/80 p-8 rounded-xl shadow-lg border border-blue-100 w-full max-w-lg mx-auto hidden">
@@ -163,7 +228,8 @@
         </div>
     </div>
 
-    <!-- 4. JavaScript Logic --><script type="module">
+    <!-- 4. JavaScript Logic -->
+     <script type="module">
         let loggedInUser = null; 
         const USER_STORAGE_KEY = 'local_auth_users';
 
@@ -368,6 +434,208 @@
                 messageElement.className = 'mt-4 text-sm font-semibold text-red-500 text-center';
                 messageElement.textContent = '❌ Login failed: Invalid password.';
             }
+        };
+
+        // --- 5. Password Reset Flow (Client-side simulation) ---
+
+        // Show the reset container and hide other auth views
+        window.showForgotPassword = () => {
+            document.getElementById('login-container').classList.add('hidden');
+            document.getElementById('register-container').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('reset-container').classList.remove('hidden');
+            // show email step
+            document.getElementById('reset-step-email').classList.remove('hidden');
+            document.getElementById('reset-step-otp').classList.add('hidden');
+            document.getElementById('reset-step-newpass').classList.add('hidden');
+            clearResetMessages();
+        };
+
+        const clearResetMessages = () => {
+            ['reset-email-message','reset-otp-message','reset-newpass-message'].forEach(id=>{
+                const el = document.getElementById(id);
+                if (el) { el.textContent = ''; el.className = 'text-sm mt-2'; }
+            });
+            document.getElementById('reset-otp-display').textContent = '';
+            document.getElementById('reset-otp-dev').classList.add('hidden');
+        };
+
+        window.cancelReset = () => {
+            document.getElementById('reset-container').classList.add('hidden');
+            toggleAuthView('login');
+        };
+
+        // Generate OTP and store temporarily in localStorage (simulation of email send)
+        window.sendPasswordReset = () => {
+            const email = (document.getElementById('reset-email').value || '').toLowerCase();
+            const msg = document.getElementById('reset-email-message');
+            const users = getStoredUsers();
+            if (!email) {
+                msg.className = 'text-sm mt-2 text-red-500';
+                msg.textContent = 'Please enter your email.';
+                return;
+            }
+            if (!users[email]) {
+                msg.className = 'text-sm mt-2 text-red-500';
+                msg.textContent = 'No account found for that email.';
+                return;
+            }
+
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
+            const expires = Date.now() + 10 * 60 * 1000; // 10 minutes
+            const resetObj = { otp, expires };
+            localStorage.setItem('pwd_reset_' + email, JSON.stringify(resetObj));
+
+            // Try sending via server API first (if you later add a backend). If API fails, fall back to mailto compose for manual send.
+            msg.className = 'text-sm mt-2 text-yellow-600';
+            msg.textContent = 'Generating code...';
+
+            const payload = { email, otp };
+
+            // Attempt to POST to a backend endpoint on the local server
+            // Make sure the server is running: server/index.js listens on port 3000
+            fetch('http://localhost:3000/api/send-reset', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            }).then(res => {
+                if (!res.ok) throw new Error('no-backend');
+                return res.json();
+            }).then(data => {
+                msg.className = 'text-sm mt-2 text-green-600';
+                msg.textContent = '✅ OTP sent to your registered email.';
+            }).catch(() => {
+                // Fallback: open user's mail client with a prefilled message so they can send the OTP to themselves
+                // Use a temporary anchor click instead of window.open to avoid creating an empty/untitled browser tab
+                msg.className = 'text-sm mt-2 text-yellow-600';
+                msg.textContent = 'No email service configured — opening mail compose as a fallback.';
+
+                const subject = encodeURIComponent('Password reset code');
+                const body = encodeURIComponent(`Your password reset code is: ${otp}\n\nThis code will expire in 10 minutes.`);
+                const mailto = `mailto:${email}?subject=${subject}&body=${body}`;
+                try {
+                    const a = document.createElement('a');
+                    a.href = mailto;
+                    a.style.display = 'none';
+                    // Some browsers require the anchor to be in the DOM to open the mail client
+                    document.body.appendChild(a);
+                    a.click();
+                    // remove the element after click
+                    setTimeout(() => a.remove(), 1000);
+                } catch (e) {
+                    // As a last resort open in same tab (will navigate away) — this rarely happens
+                    window.location.href = mailto;
+                }
+
+                // For development/testing: display OTP (hidden by default)
+                document.getElementById('reset-otp-display').textContent = otp;
+                document.getElementById('reset-otp-dev').classList.remove('hidden');
+            }).finally(() => {
+                // Move to OTP step regardless so user can enter code shown in dev area or received via mail.
+                document.getElementById('reset-step-email').classList.add('hidden');
+                document.getElementById('reset-step-otp').classList.remove('hidden');
+                document.getElementById('reset-otp').value = '';
+                document.getElementById('reset-otp').focus();
+            });
+        };
+
+        window.resendOtp = () => {
+            const email = (document.getElementById('reset-email').value || '').toLowerCase();
+            if (!email) return;
+            // simply call sendPasswordReset again (regenerates otp)
+            sendPasswordReset();
+        };
+
+        window.verifyResetOtp = () => {
+            const email = (document.getElementById('reset-email').value || '').toLowerCase();
+            const otp = (document.getElementById('reset-otp').value || '').trim();
+            const msg = document.getElementById('reset-otp-message');
+            if (!email || !otp) {
+                msg.className = 'text-sm mt-2 text-red-500';
+                msg.textContent = 'Please provide email and OTP.';
+                return;
+            }
+            const raw = localStorage.getItem('pwd_reset_' + email);
+            if (!raw) {
+                msg.className = 'text-sm mt-2 text-red-500';
+                msg.textContent = 'No OTP request found. Please request a new code.';
+                return;
+            }
+            let obj;
+            try { obj = JSON.parse(raw); } catch(e){ obj = null; }
+            if (!obj || !obj.otp) {
+                msg.className = 'text-sm mt-2 text-red-500';
+                msg.textContent = 'Invalid OTP record. Please resend.';
+                return;
+            }
+            if (Date.now() > obj.expires) {
+                msg.className = 'text-sm mt-2 text-red-500';
+                msg.textContent = 'OTP expired. Please request a new code.';
+                return;
+            }
+            if (obj.otp !== otp) {
+                msg.className = 'text-sm mt-2 text-red-500';
+                msg.textContent = 'Incorrect OTP. Check your email and try again.';
+                return;
+            }
+
+            // OTP valid — advance to new password step
+            msg.className = 'text-sm mt-2 text-green-600';
+            msg.textContent = '✅ Code verified. Please choose a new password.';
+            document.getElementById('reset-step-otp').classList.add('hidden');
+            document.getElementById('reset-step-newpass').classList.remove('hidden');
+            document.getElementById('reset-new-password').focus();
+            // mark verified (simple flag)
+            localStorage.setItem('pwd_reset_verified_' + email, '1');
+        };
+
+        window.submitNewPassword = () => {
+            const email = (document.getElementById('reset-email').value || '').toLowerCase();
+            const newPass = (document.getElementById('reset-new-password').value || '');
+            const confirm = (document.getElementById('reset-confirm-password').value || '');
+            const msg = document.getElementById('reset-newpass-message');
+            if (!email) {
+                msg.className = 'text-sm mt-2 text-red-500';
+                msg.textContent = 'Missing email.';
+                return;
+            }
+            if (localStorage.getItem('pwd_reset_verified_' + email) !== '1') {
+                msg.className = 'text-sm mt-2 text-red-500';
+                msg.textContent = 'OTP not verified. Please verify the code first.';
+                return;
+            }
+            if (newPass.length < 6) {
+                msg.className = 'text-sm mt-2 text-red-500';
+                msg.textContent = 'Password must be at least 6 characters.';
+                return;
+            }
+            if (newPass !== confirm) {
+                msg.className = 'text-sm mt-2 text-red-500';
+                msg.textContent = 'Passwords do not match.';
+                return;
+            }
+
+            const users = getStoredUsers();
+            if (!users[email]) {
+                msg.className = 'text-sm mt-2 text-red-500';
+                msg.textContent = 'User not found.';
+                return;
+            }
+
+            users[email].passwordHash = hashPassword(newPass);
+            saveStoredUsers(users);
+
+            // cleanup reset tokens
+            localStorage.removeItem('pwd_reset_' + email);
+            localStorage.removeItem('pwd_reset_verified_' + email);
+
+            msg.className = 'text-sm mt-2 text-green-600';
+            msg.textContent = '✅ Password changed successfully. You may now log in.';
+
+            setTimeout(()=>{
+                document.getElementById('reset-container').classList.add('hidden');
+                toggleAuthView('login');
+            }, 900);
         };
 
         // Start the application: checks for a previous session and updates the UI
