@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Auth System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <!-- 3. CSS Styles -->
+    <style>
+        /* The majority of the styling is handled by Tailwind CSS classes in the body. */
+        body { 
+            font-family: 'Inter', sans-serif !important; 
+            min-height: 100vh;
+            display: flex; /* Use flexbox to center content vertically */
+            flex-direction: column;
+            justify-content: center; /* Center vertically */
+            align-items: center; /* Center horizontally */
+            
+            /* --- NEW FOREST IMAGE BACKGROUND WITH OVERLAY --- */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://i.pinimg.com/736x/1f/3a/a4/1f3aa4b5315377f55acc545078909391.jpg'); /* Placeholder image, REPLACE THIS URL! */
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed; /* Optional: Makes background static as content scrolls */
+            color: #000000; /* Default text color for body, though most content is in white boxes */
+        }
+        /* Override for main title to make it visible over the dark overlay */
+        h1 {
+            color: #ffffff !important; /* White color for the main title */
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.6); /* Add a subtle shadow for better readability */
+        }
+
+        .form-input { 
+            transition: all 0.3s ease; 
+        }
+        .form-input:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); 
+            border-color: #3b82f6;
+        }
+        /* Password toggle wrapper and button */
+        .password-wrapper { position: relative; }
+        .password-toggle {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            padding: 0.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #374151;
+        }
+        .password-toggle:focus { outline: 2px solid rgba(59,130,246,0.4); border-radius: 0.375rem; }
+        
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen">
+
+   <!-- Main Content Container: Stacks all elements vertically and centers them --><div id="app-content" class="grid grid-cols-1 gap-8 max-w-5xl mx-auto z-10 relative">
+        <h1 class="text-3xl font-bold mb-4 text-center">🔐 User Authentication System</h1>
+        
+        <!-- Authentication/Dashboard Views: Tightly centered --><div class="space-y-4">
+            
+            <!-- Login Form Container (Shown by default) --><div id="login-container" class="bg-white/40 p-8 rounded-xl shadow-lg border border-green-100 w-full max-w-lg mx-auto">
+                <h2 class="text-2xl font-semibold mb-6 text-blue-600 text-center">User Login</h2>
+                <form id="login-form" onsubmit="loginUser(event)">
+                    <div class="mb-4">
+                        <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="login-email" required class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none">
+                    </div>
+                    <div class="mb-6">
+                        <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="login-password" required class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none">
+                            <button type="button" class="password-toggle" aria-label="Show password" data-target="login-password">
+                                <!-- eye icon -->
+                                <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition duration-200 shadow-md hover:shadow-lg">
+                        Log In
+                    </button>
+                    <p id="login-message" class="mt-4 text-sm font-semibold text-center"></p>
+                </form>
+                <p class="mt-6 text-center text-sm text-gray-600">
+                    Don't have an account? 
+                    <a href="#" onclick="toggleAuthView('register')" class="font-medium text-blue-600 hover:text-blue-500 transition duration-150">Sign Up Here</a>
+                </p>
+            </div>
+
+            <!-- Registration Form Container (Hidden initially) --><div id="register-container" class="bg-white/80 p-8 rounded-xl shadow-lg border border-blue-100 w-full max-w-lg mx-auto hidden">
+                <h2 class="text-2xl font-semibold mb-6 text-blue-600 text-center">New User Registration</h2>
+                <p class="text-sm text-yellow-700 bg-yellow-100 p-2 rounded mb-4 border border-yellow-200">
+                    <span class="font-bold">Note:</span> User data is saved in your browser's **Local Storage**.
+                </p>
+                <form id="register-form" onsubmit="registerUser(event)">
+                    <div class="mb-4"><label for="reg-name" class="block text-sm font-medium text-gray-700 mb-1">Name</label><input type="text" id="reg-name" required class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"></div>
+                    <div class="mb-4"><label for="reg-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" id="reg-email" required class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"></div>
+                    <div class="mb-4">
+                        <label for="reg-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="reg-password" required minlength="6" class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none">
+                            <button type="button" class="password-toggle" aria-label="Show password" data-target="reg-password">
+                                <!-- eye icon -->
+                                <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Min 6 characters required.</p>
+                    </div>
+                    <div class="mb-6"><label for="reg-role" class="block text-sm font-medium text-gray-700 mb-1">Role</label><input type="text" id="reg-role" required class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none" value="User"></div>
+                    
+                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition duration-200 shadow-md hover:shadow-lg">
+                        Register Account
+                    </button>
+                    <p id="reg-message" class="mt-4 text-sm font-semibold text-center"></p>
+                </form>
+                <p class="mt-6 text-center text-sm text-gray-600">
+                    Already have an account? 
+                    <a href="#" onclick="toggleAuthView('login')" class="font-medium text-green-600 hover:text-green-500 transition duration-150">Log In</a>
+                </p>
+            </div>
+            
+            <!-- Dashboard View (Shown ONLY when a user is successfully logged in) --><div id="dashboard-view" class="hidden bg-white/80 p-8 rounded-xl shadow-2xl border-t-4 border-indigo-500 w-full max-w-lg mx-auto">
+                <h2 class="text-3xl font-bold text-indigo-700 mb-2">Welcome to your Dashboard!</h2>
+                <p class="text-lg text-gray-600 mb-6">You are securely logged in.</p>
+                <div class="space-y-4 p-4 bg-white/50 rounded-lg border border-indigo-200">
+                    <p class="text-md text-gray-800"><span class="font-bold">Name:</span> <span id="dash-name" class="font-semibold"></span></p>
+                    <p class="text-md text-gray-800"><span class="font-bold">Email:</span> <span id="dash-email" class="font-semibold"></span></p>
+                    <p class="text-md text-gray-800"><span class="font-bold">Role:</span> <span id="dash-role" class="font-semibold text-red-500"></span></p>
+                    <p class="text-xs text-gray-500 truncate"><span class="font-bold">Session Token:</span> <span id="dash-token" class="font-mono text-xs"></span></p>
+                </div>
+                <button onclick="logOutUser()" class="w-full mt-8 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg">
+                    Log Out
+                </button>
+            </div>
+        </div>
+
+        <!-- Registered Users List --><div id="user-list-container" class="mt-4 w-full max-w-lg mx-auto">
+            <div class="bg-white/40 p-6 rounded-xl shadow-lg border border-gray-300">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Registered Users (Local Storage)</h2>
+                <p class="text-sm text-gray-500 mb-4">
+                    Data stored in browser: **Only accessible by you.**
+                </p>
+                <div id="user-list" class="space-y-3 overflow-y-auto max-h-96">
+                    <!-- User data fetched from local storage will appear here --></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. JavaScript Logic --><script type="module">
+        let loggedInUser = null; 
+        const USER_STORAGE_KEY = 'local_auth_users';
+
+        // --- 1. Utility Functions ---
+
+        const generateSessionToken = () => crypto.randomUUID();
+
+        // SIMULATION of password hashing. 
+        const hashPassword = (password) => {
+            let hash = 0;
+            for (let i = 0; i < password.length; i++) {
+                hash = ((hash << 5) - hash) + password.charCodeAt(i);
+                hash |= 0; 
+            }
+            return 'h' + hash.toString(16);
+        };
+
+        const getStoredUsers = () => {
+            try {
+                const usersJson = localStorage.getItem(USER_STORAGE_KEY);
+                return usersJson ? JSON.parse(usersJson) : {};
+            } catch (e) {
+                console.error("Error reading from local storage:", e);
+                return {};
+            }
+        };
+
+        const saveStoredUsers = (users) => {
+            try {
+                localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(users));
+                renderUserList(); 
+            } catch (e) {
+                console.error("Error writing to local storage:", e);
+            }
+        };
+
+        // --- 2. UI Control Functions ---
+
+        window.toggleAuthView = (view) => {
+            const loginContainer = document.getElementById('login-container');
+            const registerContainer = document.getElementById('register-container');
+            
+            if (view === 'login') {
+                loginContainer.classList.remove('hidden');
+                registerContainer.classList.add('hidden');
+            } else if (view === 'register') {
+                loginContainer.classList.add('hidden');
+                registerContainer.classList.remove('hidden');
+            }
+            document.getElementById('login-message').textContent = '';
+            document.getElementById('reg-message').textContent = '';
+        }
+
+        const updateUI = () => {
+            const loginContainer = document.getElementById('login-container');
+            const registerContainer = document.getElementById('register-container');
+            const dashboardView = document.getElementById('dashboard-view');
+
+            if (loggedInUser) {
+                // User is logged in: show dashboard, hide forms
+                loginContainer.classList.add('hidden');
+                registerContainer.classList.add('hidden');
+                dashboardView.classList.remove('hidden'); 
+                
+                document.getElementById('dash-name').textContent = loggedInUser.name;
+                document.getElementById('dash-email').textContent = loggedInUser.email;
+                document.getElementById('dash-role').textContent = loggedInUser.role;
+                document.getElementById('dash-token').textContent = localStorage.getItem('sessionToken');
+
+            } else {
+                // User is logged out: hide dashboard, show login form
+                dashboardView.classList.add('hidden'); 
+                toggleAuthView('login'); 
+            }
+            renderUserList(); 
+        };
+
+        const checkSession = () => {
+            const token = localStorage.getItem('sessionToken');
+            const userEmail = localStorage.getItem('userEmail');
+            const users = getStoredUsers();
+
+            if (token && userEmail && users[userEmail]) {
+                loggedInUser = users[userEmail];
+                updateUI();
+                return true;
+            }
+            loggedInUser = null;
+            updateUI(); 
+            return false;
+        }
+
+        window.logOutUser = () => {
+            localStorage.removeItem('sessionToken'); 
+            localStorage.removeItem('userEmail'); 
+            loggedInUser = null; 
+            updateUI(); 
+            document.getElementById('login-message').textContent = '✅ You have been logged out successfully.';
+        };
+
+        // --- 3. UI Rendering Functions ---
+
+        const renderUserList = () => {
+            const users = getStoredUsers();
+            const listElement = document.getElementById('user-list');
+            listElement.innerHTML = ''; 
+            const userArray = Object.values(users);
+
+            if (userArray.length === 0) {
+                listElement.innerHTML = '<p class="text-gray-500 italic">No users registered yet.</p>';
+                return;
+            }
+
+            userArray.forEach(user => {
+                const userItem = document.createElement('div');
+                const isCurrentUser = loggedInUser && loggedInUser.email === user.email;
+                // CHANGED: Applied transparency to user list items
+                userItem.className = `p-3 rounded-lg border border-gray-200 ${isCurrentUser ? 'bg-indigo-200/80 border-indigo-400' : 'bg-white/50'}`;
+                
+                userItem.innerHTML = `
+                    <p class="font-semibold text-gray-800">${user.name} ${isCurrentUser ? '(You)' : ''}</p>
+                    <p class="text-sm text-blue-500">${user.email}</p>
+                    <p class="text-xs text-gray-500">Role: <span class="font-medium text-gray-600">${user.role}</span></p>
+                    <p class="text-xs text-gray-400 mt-1">ID: ${user.id.substring(0, 8)}...</p>
+                `;
+                listElement.appendChild(userItem);
+            });
+        };
+
+        // --- 4. Core User Interaction Logic ---
+
+        window.registerUser = (event) => {
+            event.preventDefault(); 
+            const form = event.target;
+            const messageElement = document.getElementById('reg-message');
+            messageElement.textContent = 'Processing registration...';
+
+            const name = form['reg-name'].value;
+            const email = form['reg-email'].value.toLowerCase();
+            const password = form['reg-password'].value;
+            const role = form['reg-role'].value;
+
+            const users = getStoredUsers();
+
+            if (users[email]) {
+                messageElement.className = 'mt-4 text-sm font-semibold text-red-500 text-center';
+                messageElement.textContent = '❌ Registration failed: This email is already registered!';
+                return;
+            }
+
+            const hashedPassword = hashPassword(password);
+            const newUser = {
+                id: crypto.randomUUID(), 
+                name,
+                email,
+                role,
+                passwordHash: hashedPassword, 
+            };
+            
+            users[email] = newUser;
+            saveStoredUsers(users); 
+
+            form.reset();
+            messageElement.className = 'mt-4 text-sm font-semibold text-green-500 text-center';
+            messageElement.textContent = '✅ Registration Successful! Please log in.';
+            toggleAuthView('login'); 
+        };
+
+        window.loginUser = (event) => {
+            event.preventDefault(); 
+            const form = event.target;
+            const messageElement = document.getElementById('login-message');
+            messageElement.textContent = 'Attempting login...';
+
+            const email = form['login-email'].value.toLowerCase();
+            const password = form['login-password'].value;
+
+            const users = getStoredUsers();
+            const userData = users[email];
+
+            if (!userData) {
+                messageElement.className = 'mt-4 text-sm font-semibold text-red-500 text-center';
+                messageElement.textContent = '❌ Login failed: User not found.';
+                return;
+            }
+
+            if (userData.passwordHash === hashPassword(password)) {
+                
+                // Login Success! 
+                const sessionToken = generateSessionToken();
+                localStorage.setItem('sessionToken', sessionToken);
+                localStorage.setItem('userEmail', email);
+                loggedInUser = userData; 
+
+                updateUI();
+                
+                messageElement.className = 'mt-4 text-sm font-semibold text-green-600 text-center';
+                messageElement.textContent = `🔑 Login accessed! Welcome, ${userData.name}!`;
+                form.reset();
+
+            } else {
+                messageElement.className = 'mt-4 text-sm font-semibold text-red-500 text-center';
+                messageElement.textContent = '❌ Login failed: Invalid password.';
+            }
+        };
+
+        // Start the application: checks for a previous session and updates the UI
+        window.onload = checkSession;
+    </script>
+
+    <!-- Password toggle script: attaches to any button with class .password-toggle -->
+    <script>
+        (function () {
+            const eyeSvg = '<svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+            const eyeOffSvg = '<svg class="eye-off-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.64 21.64 0 0 1 4.11-4.92"></path><path d="M1 1l22 22"></path><path d="M14.12 14.12a3 3 0 0 1-4.24-4.24"></path></svg>';
+
+            document.querySelectorAll('.password-toggle').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetId = btn.dataset.target;
+                    const input = document.getElementById(targetId);
+                    if (!input) return;
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        btn.setAttribute('aria-label', 'Hide password');
+                        btn.innerHTML = eyeOffSvg;
+                    } else {
+                        input.type = 'password';
+                        btn.setAttribute('aria-label', 'Show password');
+                        btn.innerHTML = eyeSvg;
+                    }
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
